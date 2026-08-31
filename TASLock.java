@@ -13,12 +13,16 @@ public class TASLock
 
     public void lock() 
     {
-        
+        // Spin continuously until the atomic testAndSet() returns false,
+        // which indicates that we successfully acquired the lock.
+        while (testAndSet()) {}
     }
 
     public void unlock() 
     {
-        
+        // Release the lock by resetting the state to false,
+        // allowing other spinning threads to acquire it.
+        locked.set(false);
     }
     
 }
