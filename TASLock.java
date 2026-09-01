@@ -1,6 +1,6 @@
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class TASLock 
+public class TASLock implements Lock
 {
 
     private final AtomicBoolean locked = new AtomicBoolean(false);
