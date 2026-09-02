@@ -1,9 +1,11 @@
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class TASLock implements Lock
 {
 
     private final AtomicBoolean locked = new AtomicBoolean(false);
+    private final AtomicLong testAndSetCount = new AtomicLong(0);
 
     /* Do not modify this method */
     private boolean testAndSet() 
@@ -15,7 +17,13 @@ public class TASLock implements Lock
     {
         // Spin continuously until the atomic testAndSet() returns false,
         // which indicates that we successfully acquired the lock.
-        while (testAndSet()) {}
+        while (true) {
+            testAndSetCount.incrementAndGet();
+
+            if (!testAndSet()) {
+                break;
+            }
+        }
     }
 
     public void unlock() 
@@ -25,4 +33,7 @@ public class TASLock implements Lock
         locked.set(false);
     }
     
+    public long getTestAndSetCount() {
+        return testAndSetCount.get();
+    }
 }

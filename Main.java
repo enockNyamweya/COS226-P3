@@ -39,34 +39,45 @@ public class Main
 
         long endTime = System.nanoTime();
 
+        int expected = threadCount * INCREMENTS_PER_THREAD;
+
+        if (counter != expected) {
+            System.err.println("Errorrrrrrrr");
+        }
+
         return (endTime - startTime) / 1000000;
     }
 
     public static void main(String[] args) throws InterruptedException {
-        for (int threadCount : THREAD_COUNTS) {
-            System.out.println("\nNum Threads -> " + threadCount);
+        System.out.println("Threads | TAS Time | TAS Calls | TTAS Time | TTAS Calls");
+        System.out.println();
 
+        for (int threadCount : THREAD_COUNTS) {
             long tasTotalTime = 0;
+            long tasTotalCalls = 0;
+            long ttasTotalTime = 0;
+            long ttasTotalCalls = 0;
 
             for (int run = 0; run < NUMBER_OF_RUNS; run++) {
                 TASLock tas = new TASLock();
                 long time = runTests(tas, threadCount);
                 tasTotalTime += time;
-                System.out.println("Run " + (run+1) + ": " + time + " ms");
-            }
-
-            System.out.println("Average: " + (tasTotalTime / NUMBER_OF_RUNS) + " ms");
-
-            long ttasTotalTime = 0;
+                tasTotalCalls += tas.getTestAndSetCount();
+            }        
 
             for (int run = 0; run < NUMBER_OF_RUNS; run++) {
                 TTASLock ttas = new TTASLock();
                 long time = runTests(ttas, threadCount);
                 ttasTotalTime += time;
-                System.out.println("Run " + (run+1) + ": " + time + " ms");
+                ttasTotalCalls += ttas.getTestAndSetCount();
             }
 
-            System.out.println("Average: " + (ttasTotalTime / NUMBER_OF_RUNS) + " ms");
+            System.out.printf("%-7d | %-8.2f | %-9.0f | %-9.2f | %.0f%n", threadCount,
+                (double) tasTotalTime / NUMBER_OF_RUNS,
+                (double) tasTotalCalls / NUMBER_OF_RUNS,
+                (double) ttasTotalTime / NUMBER_OF_RUNS,
+                (double) ttasTotalCalls / NUMBER_OF_RUNS
+            );
         }
     }
 }
